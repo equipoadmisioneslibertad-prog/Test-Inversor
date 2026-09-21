@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Test de perfil inversor · Lucas Fernández</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Identidad de marca (Brand Book 2026): azul marino, dorado, crema · Poppins.
+     Diseño deliberadamente de un solo tema (marca), con fondos y colores explícitos. */
+  :root {
+    color-scheme: light;
+    --navy: #0b1f3a;
+    --navy-soft: #16305a;
+    --gold: #b08a3e;
+    --gold-soft: #d9bd83;
+    --cream: #f4f1ea;
+    --card: #fbf9f4;
+    --ink: #1a1a1a;
+    --muted: #6b6b6b;
+    --line: #d9d2c1;
+    --ok: #2f6b4f;
+    --warn: #8a4b12;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* Cabecera */
+  .topbar { background: var(--navy); color: var(--cream); padding-block: 16px; padding-inline: 20px; }
+  .topbar-in { max-width: 720px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .brand { font-weight: 600; letter-spacing: .32em; font-size: .78rem; text-transform: uppercase; }
+  .brand-sub { font-weight: 400; letter-spacing: .22em; font-size: .66rem; text-transform: uppercase; color: var(--gold-soft); }
+
+  main { flex: 1; width: 100%; max-width: 720px; margin: 0 auto; padding-block: 28px 56px; padding-inline: 20px; }
+  .test-banner { background: #fff3d6; border: 1px solid #e3c477; color: #5b4310; border-radius: 8px; padding: 10px 14px; font-size: .82rem; margin-bottom: 20px; }
+
+  h1, h2, h3 { font-weight: 600; color: var(--navy); line-height: 1.2; text-wrap: balance; margin: 0; }
+  .eyebrow { font-size: .72rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+  .eyebrow.gold { color: var(--gold); }
+
+  /* Intro */
+  .intro h1 { font-size: clamp(1.8rem, 6vw, 2.6rem); font-weight: 700; margin-bottom: 18px; }
+  .lead { font-size: 1.02rem; color: #33383f; max-width: 58ch; margin: 0 0 18px; }
+  .note { font-size: .86rem; color: var(--muted); max-width: 58ch; margin: 0 0 28px; padding-left: 14px; border-left: 2px solid var(--gold); }
+
+  /* Botones */
+  .btn {
+    appearance: none; border: 0; cursor: pointer; font: inherit; font-weight: 600; font-size: .98rem;
+    background: var(--navy); color: var(--cream); padding: 14px 26px; border-radius: 999px;
+    transition: background-color .15s ease, transform .15s ease;
+  }
+  .btn:hover { background: var(--navy-soft); }
+  .btn:active { transform: translateY(1px); }
+  .btn.gold { background: var(--gold); color: #fff; }
+  .btn.gold:hover { background: #9a7734; }
+  .btn.ghost { background: transparent; color: var(--navy); padding: 12px 6px; }
+  .btn.ghost:hover { background: transparent; text-decoration: underline; text-underline-offset: 4px; }
+  .btn[disabled] { opacity: .45; cursor: not-allowed; }
+  :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+  /* Progreso */
+  .progress { margin-bottom: 30px; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: .78rem; color: var(--muted); margin-bottom: 8px; letter-spacing: .04em; }
+  .bar { height: 4px; background: var(--line); border-radius: 4px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; background: var(--gold); border-radius: 4px; transition: width .3s ease; }
+
+  /* Pregunta */
+  .q-title { font-size: clamp(1.35rem, 4.6vw, 1.85rem); margin-bottom: 8px; }
+  .q-hint { color: var(--muted); font-size: .9rem; margin: 0 0 22px; max-width: 56ch; }
+  .q-title + .opts, .q-title + .field { margin-top: 22px; }
+  .opts { display: grid; gap: 10px; margin: 0; padding: 0; border: 0; }
+  .opt { position: relative; display: block; cursor: pointer; }
+  .opt input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+  .opt-face {
+    display: flex; align-items: center; gap: 14px; padding: 15px 18px; background: var(--card);
+    border: 1.5px solid var(--line); border-radius: var(--radius); font-weight: 500; color: var(--ink);
+    transition: border-color .15s ease, background-color .15s ease, color .15s ease;
+  }
+  .opt-dot { flex: none; width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--line); background: #fff; display: grid; place-items: center; transition: inherit; }
+  .opt:hover .opt-face { border-color: var(--navy); }
+  .opt input:checked + .opt-face { background: var(--navy); border-color: var(--navy); color: var(--cream); }
+  .opt input:checked + .opt-face .opt-dot { border-color: var(--gold); background: var(--gold); }
+  .opt input:checked + .opt-face .opt-dot::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #fff; }
+  .opt input:focus-visible + .opt-face { outline: 3px solid var(--gold); outline-offset: 3px; }
+  .field input[type="text"], .field textarea {
+    width: 100%; font: inherit; color: var(--ink); background: var(--card); border: 1.5px solid var(--line);
+    border-radius: var(--radius); padding: 14px 16px;
+  }
+  .field textarea { min-height: 120px; resize: vertical; }
+  .field input:focus, .field textarea:focus { outline: 3px solid var(--gold); outline-offset: 2px; border-color: var(--navy); }
+  .actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 26px; }
+  .opt-tag { font-size: .8rem; color: var(--muted); }
+
+  /* Resultado */
+  .hero { background: var(--navy); color: var(--cream); border-radius: 16px; padding: 30px 26px 28px; margin-bottom: 28px; position: relative; overflow: hidden; }
+  .hero::after { content: ""; position: absolute; right: -60px; top: -60px; width: 200px; height: 200px; border-radius: 50%; border: 1.5px solid rgba(176,138,62,.5); }
+  .hero .eyebrow { color: var(--gold-soft); }
+  .hero h1 { color: #fff; font-size: clamp(1.7rem, 6vw, 2.5rem); font-weight: 700; margin-bottom: 10px; position: relative; z-index: 1; }
+  .hero p { margin: 0; color: rgba(244,241,234,.86); max-width: 56ch; position: relative; z-index: 1; }
+  .hero .secondary { margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(217,189,131,.35); font-size: .9rem; color: var(--gold-soft); }
+  .sec { margin-bottom: 30px; }
+  .sec h2 { font-size: 1.15rem; margin-bottom: 14px; }
+  .why { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .why li { position: relative; padding-left: 26px; }
+  .why li::before { content: ""; position: absolute; left: 4px; top: .55em; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
+  .fits { display: grid; gap: 14px; }
+  .fit-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: baseline; font-size: .92rem; }
+  .fit-row .fit-name { font-weight: 500; }
+  .fit-row .fit-pct { font-variant-numeric: tabular-nums; color: var(--muted); font-weight: 500; }
+  .fit-row .bar { grid-column: 1 / -1; height: 8px; }
+  .fit-row .bar > i { background: var(--navy-soft); }
+  .fit-row.top .bar > i { background: var(--gold); }
+  .fit-row.top .fit-name, .fit-row.top .fit-pct { color: var(--navy); font-weight: 600; }
+  .steps { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 12px; }
+  .steps li { counter-increment: s; position: relative; padding-left: 40px; }
+  .steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--navy); color: var(--cream); font-size: .8rem; font-weight: 600; display: grid; place-items: center; }
+  .thanks { background: var(--card); border: 1.5px solid var(--gold); border-radius: 16px; padding: 24px 22px; }
+  .thanks h2 { font-size: 1.25rem; margin-bottom: 10px; }
+  .thanks p { margin: 0 0 16px; max-width: 58ch; }
+  .thanks p:last-child { margin-bottom: 0; }
+  .save-status { font-size: .8rem; margin-top: 14px; color: var(--muted); }
+  .save-status.ok { color: var(--ok); }
+  .save-status.err { color: var(--warn); }
+  .disclaimer { font-size: .74rem; color: var(--muted); margin-top: 22px; max-width: 64ch; }
+
+  .screen { animation: rise .3s ease both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .screen { animation: none; }
+    .bar > i, .btn, .opt-face { transition: none; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <span class="brand">Lucas Fernández</span>
+    <span class="brand-sub">Libertad financiera · Inversión inmobiliaria</span>
+  </div>
+</header>
+<main id="main"><div id="app" aria-live="polite"></div></main>
+
+<script>
+/* ============================================================
+   CONFIGURACIÓN — rellenar antes de publicar
+   ============================================================ */
+const CONFIG = {
+  // URL de la "aplicación web" de Google Apps Script (acaba en /exec). OBLIGATORIA:
+  // sin ella el test no se puede usar, porque cada enlace se valida contra la hoja.
+  ENDPOINT: '',
+  // Enlace del botón final "Escríbenos un mensaje" (p. ej. WhatsApp: https://wa.me/34600000000?text=Hola%20Lucas).
+  // Si se deja vacío, solo se muestra el texto sin botón.
+  CONTACT_URL: '',
+  CONTACT_LABEL: 'Escríbenos un mensaje',
+  // Umbrales de cualificación interna (sobre 18 puntos)
+  TIER_HOT: 12,
+  TIER_WARM: 7
+};
+
+/* ============================================================
+   VÍAS DE INVERSIÓN
+   ============================================================ */
+const VIA_KEYS = ['r', 'c', 'i', 'g'];
+const VIAS = {
+  r: {
+    name: 'Rent to Rent',
+    desc: 'Alquilas inmuebles para subarrendarlos por habitaciones y generas una renta mensual recurrente, sin necesidad de comprar el inmueble.',
+    steps: [
+      'Analiza en tu zona la demanda de habitaciones y el precio medio al que se alquilan.',
+      'Calcula tu margen: la renta que pagarías al propietario frente a lo que sumarían las habitaciones, y tus gastos fijos.',
+      'Identifica propietarios dispuestos a alquilarte el inmueble completo y prepara una propuesta clara para ellos.'
+    ]
+  },
+  c: {
+    name: 'CRV · Compra, Reforma y Venta',
+    desc: 'Compras un inmueble, lo reformas y lo vendes (house flipping) para generar capital de forma más rápida, con tu dinero o con el de inversores.',
+    steps: [
+      'Define la zona y el presupuesto máximo de compra más reforma con el que te sientes cómodo/a.',
+      'Aprende a calcular el precio de venta esperado, los costes de reforma y el margen real de cada operación.',
+      'Asegura el capital o la financiación antes de empezar a visitar inmuebles, para poder actuar rápido cuando aparezca la oportunidad.'
+    ]
+  },
+  i: {
+    name: 'Operaciones con inversores',
+    desc: 'Estructuras operaciones inmobiliarias captando capital externo, para empezar sin depender de tus propios fondos.',
+    steps: [
+      'Localiza una operación concreta y analízala con números: compra, reforma, salida y rentabilidad para el inversor.',
+      'Prepara un dosier claro y sencillo que explique la operación y cómo se reparte el resultado.',
+      'Empieza por tu círculo cercano y por inversores que ya conozcan el sector para presentar tu primera operación.'
+    ]
+  },
+  g: {
+    name: 'Intermediación y gestión de alquiler',
+    desc: 'Captas y vendes inmuebles aplicando un método comercial, o administras propiedades de terceros, generando ingresos sin necesidad de capital propio.',
+    steps: [
+      'Elige una zona y un tipo de propietario (particulares, herencias, pequeños inversores) al que quieras dirigirte.',
+      'Diseña un sistema sencillo de captación: dónde encontrarlos, cómo contactarlos y qué les ofreces.',
+      'Prepara tu propuesta de servicio y tus condiciones para la primera captación o la primera propiedad en gestión.'
+    ]
+  }
+};
+
+/* ============================================================
+   PREGUNTAS
+   w = afinidad [Rent to Rent, CRV, Inversores, Intermediación/gestión] (0-3)
+   s = puntos de cualificación interna (no se muestran al lead)
+   ============================================================ */
+const QUESTIONS = [
+  { id: 'trabajo', short: 'Situación laboral', type: 'choice', title: '¿Cuál es tu situación laboral actual?',
+    options: [
+      { t: 'Empleado/a por cuenta ajena', w: [2,1,1,1] },
+      { t: 'Autónomo/a o empresario/a', w: [1,2,1,2] },
+      { t: 'Sin empleo o estudiando', w: [1,0,3,2] },
+      { t: 'Otra situación', w: [1,1,1,1] }
+    ] },
+  { id: 'experiencia', short: 'Experiencia inmobiliaria', type: 'choice', title: '¿Qué experiencia tienes invirtiendo en inmuebles?',
+    options: [
+      { t: 'Ninguna, empiezo desde cero', w: [2,0,2,2], s: 0 },
+      { t: 'Me he formado o he leído, pero no he operado', w: [2,1,2,2], s: 1 },
+      { t: 'He hecho 1 o 2 operaciones', w: [1,3,2,1], s: 2 },
+      { t: 'Ya invierto de forma habitual', w: [0,3,2,1], s: 2 }
+    ] },
+  { id: 'capital', short: 'Capital disponible', type: 'choice', title: '¿Con cuánto capital propio podrías empezar a invertir?',
+    hint: 'Dinero disponible hoy, sin tocar tus ahorros de emergencia.',
+    options: [
+      { t: 'Menos de 3.000 €', w: [1,0,3,3], s: 0 },
+      { t: 'Entre 3.000 y 10.000 €', w: [3,0,2,2], s: 1 },
+      { t: 'Entre 10.000 y 40.000 €', w: [2,2,1,1], s: 2 },
+      { t: 'Más de 40.000 €', w: [1,3,0,0], s: 3 }
+    ] },
+  { id: 'financiacion', short: 'Acceso a financiación', type: 'choice', title: '¿Tendrías acceso a financiación (hipoteca, préstamo o un socio)?',
+    options: [
+      { t: 'No, ahora mismo no', w: [1,0,3,2], s: 0 },
+      { t: 'Quizá, con un aval o un socio', w: [2,1,2,1], s: 1 },
+      { t: 'Sí, mis ingresos e historial me lo permitirían', w: [2,2,1,1], s: 2 },
+      { t: 'Sí, ya he financiado inmuebles antes', w: [1,3,1,1], s: 3 }
+    ] },
+  { id: 'tiempo', short: 'Tiempo semanal', type: 'choice', title: '¿Cuántas horas a la semana puedes dedicarle?',
+    options: [
+      { t: 'Menos de 5 horas', w: [1,1,2,0], s: 0 },
+      { t: 'Entre 5 y 10 horas', w: [2,1,2,1], s: 1 },
+      { t: 'Entre 10 y 20 horas', w: [2,2,2,2], s: 2 },
+      { t: 'Más de 20 horas', w: [2,2,2,3], s: 3 }
+    ] },
+  { id: 'objetivo', short: 'Objetivo principal', type: 'choice', title: '¿Cuál es tu objetivo principal?',
+    options: [
+      { t: 'Ingresos mensuales recurrentes', w: [3,0,1,1] },
+      { t: 'Generar capital de forma rápida', w: [0,3,2,1] },
+      { t: 'Construir patrimonio a largo plazo', w: [1,2,3,0] },
+      { t: 'Dejar mi trabajo y montar mi propio negocio', w: [2,1,2,3] }
+    ] },
+  { id: 'plazo', short: 'Plazo primera operación', type: 'choice', title: '¿En cuánto tiempo quieres cerrar tu primera operación?',
+    options: [
+      { t: 'En los próximos 3 meses', w: [3,1,2,2], s: 3 },
+      { t: 'Entre 3 y 6 meses', w: [2,1,2,2], s: 2 },
+      { t: 'Entre 6 y 12 meses', w: [1,2,2,1], s: 1 },
+      { t: 'Sin prisa, más de un año', w: [0,3,1,0], s: 0 }
+    ] },
+  { id: 'riesgo', short: 'Tolerancia al riesgo', type: 'choice', title: '¿Cómo describirías tu tolerancia al riesgo?',
+    options: [
+      { t: 'Baja: prefiero ir sobre seguro', w: [2,0,1,3] },
+      { t: 'Media: asumo riesgo si está calculado', w: [2,2,2,2] },
+      { t: 'Alta: busco más retorno aunque implique más riesgo', w: [1,3,3,1] }
+    ] },
+  { id: 'implicacion', short: 'Implicación en gestión', type: 'choice', title: '¿Cuánto quieres implicarte en obras, inquilinos y gestión del día a día?',
+    options: [
+      { t: 'Lo mínimo: prefiero no lidiar con eso', w: [0,0,2,3] },
+      { t: 'Lo justo, apoyándome en profesionales', w: [2,2,2,2] },
+      { t: 'Me implico directamente, sin problema', w: [3,3,1,1] }
+    ] },
+  { id: 'ventas', short: 'Comodidad negociando', type: 'choice', title: '¿Cómo de cómodo/a te sientes negociando y vendiendo?',
+    options: [
+      { t: 'Me cuesta bastante', w: [2,2,0,0] },
+      { t: 'Me defiendo bien', w: [2,2,2,2] },
+      { t: 'Se me da muy bien', w: [1,2,3,3] }
+    ] },
+  { id: 'inversion', short: 'Inversión viable en acompañamiento', type: 'choice',
+    title: 'Para avanzar con un plan a medida y acompañamiento directo, ¿qué nivel de inversión te resultaría viable?',
+    options: [
+      { t: 'Ahora mismo no podría invertir en formación', s: 0 },
+      { t: 'Hasta 1.500 €', s: 1 },
+      { t: 'Entre 1.500 y 4.000 €', s: 2 },
+      { t: 'Entre 4.000 y 6.000 €', s: 3 },
+      { t: 'Más de 6.000 €', s: 4 }
+    ] },
+  { id: 'zona', short: 'Zona de inversión', type: 'text', optional: true,
+    title: '¿En qué ciudad o zona te gustaría invertir?', hint: 'Opcional. Por ejemplo: Málaga, Madrid, tu provincia…', placeholder: 'Ciudad o zona' },
+  { id: 'freno', short: 'Principal freno', type: 'longtext', optional: true,
+    title: '¿Qué es lo que más te frena hoy para dar el paso?', hint: 'Opcional. Cuéntanoslo con tus palabras: nos ayuda a orientarte mejor.', placeholder: 'Escribe aquí…' }
+];
+
+/* Máximos posibles (para calcular la afinidad en %) */
+const MAX_W = [0,0,0,0];
+let MAX_S = 0;
+QUESTIONS.forEach(q => {
+  if (q.type !== 'choice') return;
+  VIA_KEYS.forEach((k, j) => { MAX_W[j] += Math.max(0, ...q.options.map(o => (o.w ? o.w[j] : 0))); });
+  MAX_S += Math.max(0, ...q.options.map(o => o.s || 0));
+});
+
+/* ============================================================
+   MOTIVOS PERSONALIZADOS DE LA RECOMENDACIÓN
+   a = índice de la opción elegida en cada pregunta
+   ============================================================ */
+function reasons(v, a) {
+  const out = [];
+  const add = (cond, text) => { if (cond) out.push(text); };
+  if (v === 'r') {
+    add(a.capital <= 1, 'No necesitas comprar el inmueble: con un capital moderado para fianza y puesta a punto puedes arrancar.');
+    add(a.objetivo === 0, 'Buscas ingresos mensuales recurrentes, justo lo que genera el subarriendo por habitaciones.');
+    add(a.plazo <= 1, 'Es una de las vías más ágiles para empezar a ver ingresos.');
+    add(a.implicacion >= 1, 'Estás dispuesto/a a implicarte en la gestión del día a día, clave para que funcione.');
+    add(a.riesgo <= 1, 'Tiene un riesgo más acotado que comprar y reformar.');
+  } else if (v === 'c') {
+    add(a.capital >= 2, 'Cuentas con capital propio para afrontar la inversión inicial.');
+    add(a.financiacion >= 2, 'Tu acceso a financiación te permite abordar operaciones de mayor tamaño.');
+    add(a.objetivo === 1, 'Quieres generar capital de forma rápida, y comprar-reformar-vender está pensado para eso.');
+    add(a.riesgo >= 1, 'Asumes un riesgo calculado, algo necesario en operaciones con reforma.');
+    add(a.implicacion === 2, 'Te implicas directamente en obra y reforma, donde se genera buena parte del margen.');
+    add(a.experiencia >= 2, 'Tu experiencia previa te da ventaja para analizar y cerrar operaciones.');
+  } else if (v === 'i') {
+    add(a.capital <= 1, 'Puedes empezar sin depender de fondos propios: el capital lo aportan terceros.');
+    add(a.financiacion <= 1, 'Con poco acceso a financiación tradicional, el capital de inversores es tu palanca.');
+    add(a.ventas === 2, 'Se te da bien negociar y vender, una habilidad clave para captar inversores.');
+    add(a.objetivo === 2, 'Buscas construir patrimonio a largo plazo, y las operaciones con inversores escalan bien.');
+    add(a.riesgo >= 1, 'Tu perfil de riesgo encaja con estructurar operaciones más ambiciosas.');
+    add(a.tiempo >= 2, 'Tienes tiempo para analizar operaciones y preparar cada propuesta con calidad.');
+  } else {
+    add(a.capital <= 1, 'Puedes entrar sin capital propio y generar ingresos desde el principio.');
+    add(a.ventas >= 1, 'Tu facilidad para negociar es el activo principal en intermediación.');
+    add(a.implicacion === 0, 'Prefieres no lidiar con obras ni inquilinos: aquí aportas tu método comercial y tu gestión.');
+    add(a.riesgo === 0, 'Es la vía con menor exposición al riesgo económico.');
+    add(a.objetivo === 3, 'Es una vía excelente para construir tu propio negocio inmobiliario.');
+    add(a.tiempo >= 2, 'Tienes tiempo para prospectar y captar con constancia.');
+  }
+  const fallback = [
+    'Es la vía que mejor puntúa con el conjunto de tus respuestas.',
+    'Se adapta a tu punto de partida actual, sin exigirte más de lo que ahora tienes.',
+    'Puedes empezar por aquí y combinarla después con otras vías.'
+  ];
+  fallback.forEach(f => { if (out.length < 3) out.push(f); });
+  return out.slice(0, 3);
+}
+
+/* ============================================================
+   ESTADO, ALMACENAMIENTO Y PARÁMETROS DEL ENLACE
+   ============================================================ */
+const params = new URLSearchParams(location.search);
+const LEAD_ID = (params.get('id') || '').replace(/[^\w.-]/g, '').slice(0, 40) || 'sin-enlace';
+let LEAD_NAME = '';  // se rellena con el nombre registrado en la hoja al verificar el enlace
+const STORE_KEY = 'lf_inversion_v1_' + LEAD_ID;
+
+function loadState() {
+  try {
+    if (params.get('reset') === '1') localStorage.removeItem(STORE_KEY);
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) { const s = JSON.parse(raw); if (s && typeof s === 'object') return s; }
+  } catch (e) {}
+  return null;
+}
+function saveState() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+const saved = loadState();
+const state = {
+  step: saved && typeof saved.step === 'number' ? saved.step : -1,
+  ans: (saved && saved.ans) || {},
+  result: (saved && saved.result) || null,
+  sent: !!(saved && saved.sent)
+};
+if (state.result) state.step = QUESTIONS.length;
+if (state.step >= QUESTIONS.length && !state.result) state.step = -1;
+
+/* ============================================================
+   CÁLCULO DEL RESULTADO
+   ============================================================ */
+function compute() {
+  const sums = [0,0,0,0];
+  let score = 0;
+  const idx = {};
+  QUESTIONS.forEach(q => {
+    if (q.type !== 'choice') return;
+    const i = state.ans[q.id];
+    idx[q.id] = i;
+    const o = q.options[i];
+    if (!o) return;
+    if (o.w) VIA_KEYS.forEach((k, j) => { sums[j] += o.w[j]; });
+    score += o.s || 0;
+  });
+  const fit = {};
+  VIA_KEYS.forEach((k, j) => { fit[k] = MAX_W[j] ? Math.round(100 * sums[j] / MAX_W[j]) : 0; });
+  const order = VIA_KEYS.slice().sort((x, y) => fit[y] - fit[x] || sums[VIA_KEYS.indexOf(y)] - sums[VIA_KEYS.indexOf(x)]);
+  const first = order[0], second = order[1];
+  const secondary = (fit[first] - fit[second] <= 10 && fit[second] >= 60) ? second : null;
+  let tier = score >= CONFIG.TIER_HOT ? 'Caliente' : score >= CONFIG.TIER_WARM ? 'Templado' : 'Frío';
+  const inv = idx.inversion;
+  if (inv === 0 && tier === 'Caliente') tier = 'Templado';
+  return { primary: first, secondary, fit, order, score, tier, idx };
+}
+
+function buildPayload(res) {
+  return {
+    v: 1,
+    sid: Math.random().toString(36).slice(2, 10) + Date.now().toString(36),
+    id: LEAD_ID,
+    name: LEAD_NAME,
+    submittedAt: new Date().toISOString(),
+    recommended: VIAS[res.primary].name,
+    secondary: res.secondary ? VIAS[res.secondary].name : '',
+    fit: res.fit,
+    score: res.score,
+    maxScore: MAX_S,
+    tier: res.tier,
+    answers: QUESTIONS.map(q => {
+      const a = state.ans[q.id];
+      return { q: q.short, a: q.type === 'choice' ? (q.options[a] ? q.options[a].t : '') : (a || '') };
+    })
+  };
+}
+
+/* ============================================================
+   ENVÍO DE RESPUESTAS (Google Apps Script → Google Sheets)
+   ============================================================ */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function sendPayload(payload) {
+  if (!CONFIG.ENDPOINT) { console.info('[Modo prueba] Respuestas que se enviarían:', payload); return 'test'; }
+  for (let t = 0; t < 3; t++) {
+    try {
+      await fetch(CONFIG.ENDPOINT, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      return 'ok';
+    } catch (e) { await sleep(700 * (t + 1)); }
+  }
+  return 'fail';
+}
+async function submit() {
+  if (!state.result) return;
+  setStatus('Guardando tus respuestas…', '');
+  const payload = state.result.payload;
+  if (!payload.sid) { payload.sid = Math.random().toString(36).slice(2, 10) + Date.now().toString(36); saveState(); }
+  const outcome = await sendPayload(payload);
+  if (outcome !== 'ok') { setStatus('No hemos podido guardar tus respuestas. Comprueba tu conexión.', 'err', true); return; }
+  // El envío no devuelve respuesta legible, así que se confirma preguntando a la hoja
+  for (const wait of [1500, 2500, 4000]) {
+    await sleep(wait);
+    const v = await verifyLink();
+    if (v.status === 'valid' && v.sid === payload.sid) {
+      state.sent = true; saveState();
+      setStatus('Tus respuestas se han guardado correctamente.', 'ok');
+      return;
+    }
+  }
+  console.warn('No se pudo confirmar el guardado en la hoja de Google (id=' + LEAD_ID + ')');
+  setStatus('No hemos podido confirmar que tus respuestas se guardaran.', 'err', true);
+}
+function setStatus(text, cls, retry) {
+  const el = document.getElementById('save-status');
+  if (!el) return;
+  el.className = 'save-status ' + cls;
+  el.textContent = text + ' ';
+  if (retry) {
+    const b = document.createElement('button');
+    b.className = 'btn ghost'; b.type = 'button'; b.textContent = 'Reintentar';
+    b.style.padding = '0'; b.addEventListener('click', submit);
+    el.appendChild(b);
+  }
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+const app = document.getElementById('app');
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const k in (attrs || {})) {
+    if (k === 'class') e.className = attrs[k];
+    else if (k === 'text') e.textContent = attrs[k];
+    else e.setAttribute(k, attrs[k]);
+  }
+  kids.flat().forEach(c => { if (c != null) e.append(c.nodeType ? c : document.createTextNode(c)); });
+  return e;
+}
+function firstName() { return LEAD_NAME ? LEAD_NAME.split(' ')[0] : ''; }
+
+function render() {
+  app.replaceChildren();
+  if (state.step === -1) renderIntro();
+  else if (state.step >= QUESTIONS.length) renderResult();
+  else renderQuestion(state.step);
+  window.scrollTo({ top: 0 });
+}
+
+function renderIntro() {
+  const name = firstName();
+  const s = h('section', { class: 'screen intro' },
+    h('p', { class: 'eyebrow gold', text: name ? 'Hola, ' + name : 'Test de perfil inversor' }),
+    h('h1', { text: 'Descubre qué tipo de inversión inmobiliaria encaja contigo' }),
+    h('p', { class: 'lead', text: 'Responde ' + QUESTIONS.length + ' preguntas rápidas (unos 3 minutos) y te diremos qué vía se adapta mejor a tu situación: Rent to Rent, CRV, operaciones con inversores o intermediación y gestión de alquiler.' }),
+    h('p', { class: 'note', text: 'Este enlace es personal. Tus respuestas solo las verá nuestro equipo, para orientarte mejor.' }),
+    h('button', { class: 'btn', type: 'button', id: 'start', text: 'Empezar el test' })
+  );
+  app.append(s);
+  const startBtn = document.getElementById('start');
+  startBtn.addEventListener('click', () => { state.step = 0; saveState(); render(); });
+  startBtn.focus({ preventScroll: true });
+}
+
+function progressBlock(i) {
+  const pct = Math.round((i / QUESTIONS.length) * 100);
+  const bar = h('div', { class: 'bar', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': String(QUESTIONS.length), 'aria-valuenow': String(i), 'aria-label': 'Progreso del test' }, h('i', { style: 'width:' + pct + '%' }));
+  return h('div', { class: 'progress' },
+    h('div', { class: 'progress-meta' }, h('span', { text: 'Pregunta ' + (i + 1) + ' de ' + QUESTIONS.length }), h('span', { text: pct + '%' })),
+    bar);
+}
+
+function goNext() {
+  if (state.step + 1 >= QUESTIONS.length) return finish();
+  state.step++; saveState(); render();
+}
+function goBack() { if (state.step > 0) { state.step--; saveState(); render(); } else { state.step = -1; saveState(); render(); } }
+
+function renderQuestion(i) {
+  const q = QUESTIONS[i];
+  const s = h('section', { class: 'screen' }, progressBlock(i), h('h2', { class: 'q-title', id: 'qt', text: q.title }));
+  if (q.hint) s.append(h('p', { class: 'q-hint', text: q.hint }));
+  const isLast = i === QUESTIONS.length - 1;
+
+  if (q.type === 'choice') {
+    const group = h('div', { class: 'opts', role: 'radiogroup', 'aria-labelledby': 'qt' });
+    q.options.forEach((o, j) => {
+      const inputId = 'q_' + q.id + '_' + j;
+      const input = h('input', { type: 'radio', name: q.id, id: inputId, value: String(j) });
+      if (state.ans[q.id] === j) input.checked = true;
+      input.addEventListener('change', () => {
+        state.ans[q.id] = j; saveState();
+        setTimeout(goNext, 260);
+      });
+      group.append(h('label', { class: 'opt', for: inputId }, input, h('span', { class: 'opt-face' }, h('span', { class: 'opt-dot' }), h('span', { text: o.t }))));
+    });
+    s.append(group);
+    const actions = h('div', { class: 'actions' }, h('button', { class: 'btn ghost', type: 'button', id: 'back', text: '← Atrás' }));
+    if (state.ans[q.id] !== undefined) {
+      actions.append(h('button', { class: 'btn', type: 'button', id: 'next', text: isLast ? 'Ver mi resultado' : 'Siguiente' }));
+    }
+    s.append(actions);
+  } else {
+    const isLong = q.type === 'longtext';
+    const input = isLong
+      ? h('textarea', { id: 'f_' + q.id, maxlength: '500', placeholder: q.placeholder || '', 'aria-labelledby': 'qt' })
+      : h('input', { type: 'text', id: 'f_' + q.id, maxlength: '120', placeholder: q.placeholder || '', 'aria-labelledby': 'qt', autocomplete: 'off' });
+    input.value = state.ans[q.id] || '';
+    s.append(h('div', { class: 'field' }, input));
+    s.append(h('div', { class: 'actions' },
+      h('button', { class: 'btn ghost', type: 'button', id: 'back', text: '← Atrás' }),
+      h('button', { class: 'btn', type: 'button', id: 'next', text: isLast ? 'Ver mi resultado' : 'Siguiente' }),
+      h('span', { class: 'opt-tag', text: 'Puedes dejarlo en blanco' })
+    ));
+    input.addEventListener('input', () => { state.ans[q.id] = input.value.trim(); saveState(); });
+    if (!isLong) input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); state.ans[q.id] = input.value.trim(); saveState(); goNext(); } });
+    setTimeout(() => input.focus({ preventScroll: true }), 50);
+  }
+  app.append(s);
+  document.getElementById('back').addEventListener('click', goBack);
+  const nextBtn = document.getElementById('next');
+  if (nextBtn) nextBtn.addEventListener('click', goNext);
+}
+
+function finish() {
+  const res = compute();
+  res.payload = buildPayload(res);
+  state.result = res;
+  state.step = QUESTIONS.length;
+  state.sent = false;
+  saveState();
+  render();
+}
+
+function renderResult() {
+  const res = state.result;
+  const via = VIAS[res.primary];
+  const name = firstName();
+  const idx = res.idx || {};
+
+  const hero = h('div', { class: 'hero' },
+    h('p', { class: 'eyebrow', text: 'Tu vía recomendada' }),
+    h('h1', { text: via.name }),
+    h('p', { text: via.desc })
+  );
+  if (res.secondary) hero.append(h('p', { class: 'secondary', text: 'También encaja contigo: ' + VIAS[res.secondary].name + '. Muchas personas combinan ambas.' }));
+
+  const why = h('ul', { class: 'why' }, reasons(res.primary, idx).map(t => h('li', { text: t })));
+  const fits = h('div', { class: 'fits' }, res.order.map((k, n) => h('div', { class: 'fit-row' + (n === 0 ? ' top' : '') },
+    h('span', { class: 'fit-name', text: VIAS[k].name }),
+    h('span', { class: 'fit-pct', text: res.fit[k] + '%' }),
+    h('div', { class: 'bar' }, h('i', { style: 'width:' + res.fit[k] + '%' }))
+  )));
+  const steps = h('ol', { class: 'steps' }, via.steps.map(t => h('li', { text: t })));
+
+  const thanks = h('div', { class: 'thanks' },
+    h('h2', { text: '¡Enhorabuena' + (name ? ', ' + name : '') + '! Has completado el cuestionario' }),
+    h('p', { text: 'Has dado un paso que muchos no dan: ponerle claridad a tu punto de partida. Si tienes cualquier duda sobre tu resultado, escríbenos un mensaje y te respondemos.' })
+  );
+  if (CONFIG.CONTACT_URL) {
+    thanks.append(h('p', {}, h('a', { class: 'btn gold', href: CONFIG.CONTACT_URL, target: '_blank', rel: 'noopener', style: 'display:inline-block;text-decoration:none', text: CONFIG.CONTACT_LABEL })));
+  }
+  thanks.append(h('p', { class: 'save-status', id: 'save-status' }));
+
+  const s = h('section', { class: 'screen' },
+    hero,
+    h('div', { class: 'sec' }, h('h2', { text: 'Por qué encaja contigo' }), why),
+    h('div', { class: 'sec' }, h('h2', { text: 'Tu afinidad con cada vía' }), fits),
+    h('div', { class: 'sec' }, h('h2', { text: 'Tus primeros pasos' }), steps),
+    thanks,
+    h('p', { class: 'disclaimer', text: 'Este resultado es orientativo, se basa únicamente en tus respuestas y no constituye asesoramiento financiero. Toda inversión inmobiliaria implica riesgo.' })
+  );
+  app.append(s);
+
+  if (!state.sent) submit();
+  else setStatus('Tus respuestas se han guardado correctamente.', 'ok');
+}
+
+/* ============================================================
+   VERIFICACIÓN DEL ENLACE (solo enlaces registrados en la hoja)
+   ============================================================ */
+function verifyLink() {
+  return new Promise(resolve => {
+    if (LEAD_ID === 'sin-enlace') return resolve({ status: 'invalid' });
+    if (!CONFIG.ENDPOINT) return resolve({ status: 'config' });
+    const cb = '__lf_cb_' + Date.now();
+    const s = document.createElement('script');
+    let done = false;
+    const t = setTimeout(() => finish({ status: 'error' }), 15000);
+    function finish(r) {
+      if (done) return;
+      done = true; clearTimeout(t);
+      try { delete window[cb]; } catch (e) { window[cb] = undefined; }
+      s.remove(); resolve(r);
+    }
+    window[cb] = d => finish(d && d.ok ? { status: d.valid ? 'valid' : 'invalid', name: d.name || '', sid: d.sid || '', completed: !!d.completed } : { status: 'error' });
+    s.onerror = () => finish({ status: 'error' });
+    s.src = CONFIG.ENDPOINT + (CONFIG.ENDPOINT.indexOf('?') >= 0 ? '&' : '?') + 'id=' + encodeURIComponent(LEAD_ID) + '&callback=' + cb;
+    document.head.appendChild(s);
+  });
+}
+
+function renderBlocked(kind) {
+  app.replaceChildren();
+  const titles = {
+    invalid: 'Este enlace no es válido',
+    done: 'Ya has completado este test',
+    error: 'No hemos podido comprobar tu enlace',
+    config: 'Este test no está disponible por el momento'
+  };
+  const texts = {
+    invalid: 'El enlace que has usado no está registrado. Escríbenos un mensaje y te enviamos tu enlace personal.',
+    done: 'Este enlace es personal y solo se puede responder una vez. Si tienes cualquier duda sobre tu resultado, escríbenos un mensaje y te respondemos.',
+    error: 'Revisa tu conexión a internet e inténtalo de nuevo.',
+    config: 'Vuelve a intentarlo dentro de un rato.'
+  };
+  const s = h('section', { class: 'screen intro' },
+    h('p', { class: 'eyebrow gold', text: 'Test de perfil inversor' }),
+    h('h1', { text: titles[kind] }),
+    h('p', { class: 'lead', text: texts[kind] })
+  );
+  if (kind === 'error') {
+    const b = h('button', { class: 'btn', type: 'button', text: 'Reintentar' });
+    b.addEventListener('click', boot);
+    s.append(b);
+  } else if ((kind === 'invalid' || kind === 'done') && CONFIG.CONTACT_URL) {
+    s.append(h('a', { class: 'btn gold', href: CONFIG.CONTACT_URL, target: '_blank', rel: 'noopener', style: 'display:inline-block;text-decoration:none', text: CONFIG.CONTACT_LABEL }));
+  }
+  app.append(s);
+}
+
+async function boot() {
+  app.replaceChildren(h('p', { class: 'lead', text: 'Comprobando tu enlace…' }));
+  const v = await verifyLink();
+  if (v.status !== 'valid') return renderBlocked(v.status);
+  LEAD_NAME = String(v.name || '').trim().replace(/\s+/g, ' ').slice(0, 40);
+  const mySid = state.result && state.result.payload && state.result.payload.sid;
+  if (v.completed) {
+    // Enlace ya usado: solo ve su resultado quien lo respondió desde este mismo dispositivo
+    if (mySid && mySid === v.sid) return render();
+    return renderBlocked('done');
+  }
+  if (state.result && state.sent) {
+    // El equipo ha reabierto el enlace: se empieza de cero
+    state.step = -1; state.ans = {}; state.result = null; state.sent = false; saveState();
+  }
+  render();
+}
+
+window.addEventListener('online', () => { if (state.result && !state.sent) submit(); });
+boot();
+</script>
+</body>
+</html>
